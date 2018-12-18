@@ -3,6 +3,7 @@ package joelespinal.com.greenprodiver.ui
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.LoaderManager
@@ -16,13 +17,14 @@ import android.widget.Toast
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
 import joelespinal.com.greenprodiver.data.BookContentProvider
+import joelespinal.com.greenprodiver.data.LibraryContract
 import joelespinal.com.greenprodiver.ui.adapters.BookCursorRecyclerViewAdapter
 import java.util.*
 
 
 class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
-    val offset = 30
+    private val offset = 30
     private var page = 0
 
     private var bookRecyclerView: RecyclerView? = null
@@ -67,6 +69,7 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         }
 
         bookRecyclerView!!.addOnScrollListener(scrollListener)
+        Log.d("CREATE", "CREATE")
     }
 
     fun fillTestElements() {
@@ -78,15 +81,20 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
             contentValues.put(BookColumn.AUTHOR, "UNKNOWN")
             contentValues.put(BookColumn.PUBLICATION_DATE, Calendar.getInstance().timeInMillis)
             contentValuesArray[i] = contentValues
+
+            var uri: Uri = BookContentProvider.urlForItems(0)
+            contentResolver.insert(uri, contentValues)
         }
 
-        contentResolver.bulkInsert(BookContentProvider.urlForItems(0), contentValuesArray)
+        // contentResolver.insert(LibraryContract.CONTENT_URI, contentValuesArray)
     }
 
     private fun getItemsCountLocal(): Int {
         var itemCount: Int = 0
 
-        var query: Cursor = contentResolver.query(BookContentProvider.urlForItems(0), null, null, null, null)
+        var uri: Uri = BookContentProvider.urlForItems(0)
+
+        var query: Cursor? = contentResolver.query(uri, null, null, null, null)
         if (query != null) {
             itemCount = query.count
             query.close()

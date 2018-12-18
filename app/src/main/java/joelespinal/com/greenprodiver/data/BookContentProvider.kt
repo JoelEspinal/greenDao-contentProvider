@@ -24,7 +24,7 @@ class BookContentProvider : ContentProvider() {
     private val BOOKS: Int = 100
     private val BOOKS_ID: Int = 101
     private var uriMaster: UriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-    private val TABLE_ITEMS = 0
+    private val databaseName: String = "library.db"
 
     companion object {
 
@@ -37,8 +37,11 @@ class BookContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
         uriMaster.addURI(LibraryContract.CONTENT_AUTHORITY, "$Book_Table_Name/offset/#", BOOKS)
-        dbHelper = DaoMaster.DevOpenHelper(context, "library.db")
-        return false
+
+        dbHelper = DaoMaster.DevOpenHelper(context, databaseName)
+        var db = dbHelper!!.getWritableDb()
+        val daoSession = DaoMaster(db).newSession()
+        return true
     }
 
     override fun query(

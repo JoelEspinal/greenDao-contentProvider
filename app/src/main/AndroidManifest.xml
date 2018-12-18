@@ -21,7 +21,7 @@
                 android:name=".data.BookContentProvider"
                 android:authorities="com.joelespinal.library"
                 android:enabled="true"
-                android:exported="true">
+                android:exported="false">
         </provider>
     </application>
 
