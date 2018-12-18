@@ -1,6 +1,6 @@
 package joelespinal.com.greenprodiver.constants
 
-const val Book_Table_Name: String = "BOOKS"
+const val Book_Table_Name: String = "books"
 class BookColumn {
     companion object {
         const val _ID: String = "_id"

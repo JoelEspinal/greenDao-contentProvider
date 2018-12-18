@@ -24,9 +24,11 @@ class BookContentProvider : ContentProvider() {
     private val BOOKS: Int = 100
     private val BOOKS_ID: Int = 101
     private var uriMaster: UriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-
+    private val TABLE_ITEMS = 0
 
     companion object {
+
+
         fun urlForItems(limit: Int): Uri {
             return Uri.parse("content://" + LibraryContract.CONTENT_AUTHORITY + "/" + LibraryContract.PATH_BOOKS + "/offset/" + limit)
         }
@@ -34,17 +36,18 @@ class BookContentProvider : ContentProvider() {
 
 
     override fun onCreate(): Boolean {
-        TODO("Implement this to initialize your content provider on startup.")
-        val dbHelper = DaoMaster.DevOpenHelper(context, "library.db")
+        uriMaster.addURI(LibraryContract.CONTENT_AUTHORITY, "$Book_Table_Name/offset/#", BOOKS)
+        dbHelper = DaoMaster.DevOpenHelper(context, "library.db")
         return false
     }
 
     override fun query(
-        uri: Uri, projection: Array<String>?, selection: String?,
-        selectionArgs: Array<String>?, sortOrder: String?
+        uri: Uri, projection: Array<String>?, _selection: String?,
+        _selectionArgs: Array<String>?, sortOrder: String?
     ): Cursor? {
-        TODO("Implement this to handle query requests from clients.")
 
+        var selection = _selection
+        var selectionArgs = _selectionArgs
         val cursor: Cursor
 
         val database: SQLiteDatabase = dbHelper!!.readableDatabase
@@ -72,22 +75,25 @@ class BookContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues): Uri? {
-        TODO("Implement this to handle requests to insert a new row.")
 
         val match = uriMaster.match(uri)
         when (match) {
-            BOOKS -> return insertBook(uri, values)
+            BOOKS -> {
+                return insertBook(uri, values)
+            }
             else -> throw IllegalArgumentException("Insertion is not supported for $uri")
         }
 
     }
 
     override fun update(
-        uri: Uri, values: ContentValues?, selection: String?,
-        selectionArgs: Array<String>?
+        uri: Uri, values: ContentValues?, _selection: String?,
+        _selectionArgs: Array<String>?
     ): Int {
-        TODO("Implement this to handle requests to update one or more rows.")
+        var selection = _selection
+        var selectionArgs = _selectionArgs
         val match = uriMaster.match(uri)
+
         when (match) {
             BOOKS -> return updateBook(uri, values, selection, selectionArgs)
             BOOKS_ID -> {
@@ -135,8 +141,10 @@ class BookContentProvider : ContentProvider() {
     }
 
 
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
-        TODO("Implement this to handle requests to delete one or more rows")
+    override fun delete(uri: Uri, _selection: String?, _selectionArgs: Array<String>?): Int {
+
+        var selectionArgs = _selectionArgs
+        var selection = _selection
 
         val database: SQLiteDatabase = dbHelper!!.writableDatabase
         val match: Int = uriMaster.match(uri)
@@ -161,12 +169,6 @@ class BookContentProvider : ContentProvider() {
     }
 
     override fun getType(uri: Uri): String? {
-        TODO(
-            "Implement this to handle requests for the MIME type of the data" +
-                    "at the given URI"
-        )
-
-
         val match: Int = uriMaster.match(uri)
         when (match) {
             BOOKS -> return LibraryContract.BOOK_LIST_TYPE
@@ -190,7 +192,7 @@ class BookContentProvider : ContentProvider() {
 
         val dateLong: Long = values.getAsLong(BookColumn.PUBLICATION_DATE)
         val publicationDate: Date
-        if (dateLong > 0L) {
+        if (dateLong < 0L) {
             throw IllegalArgumentException("Book Requires a Date")
         } else {
             publicationDate = Date(dateLong)
@@ -208,9 +210,9 @@ class BookContentProvider : ContentProvider() {
         book.publicationDate = publicationDate
 
         val id: Long = bookDao.insert(book)
+        val retUri = ContentUris.withAppendedId(uri, id)
 
-        context.contentResolver.notifyChange(uri, null)
-        return ContentUris.withAppendedId(uri, id)
+        return ContentUris.withAppendedId(retUri, id)
     }
 
 }

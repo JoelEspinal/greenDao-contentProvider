@@ -9,7 +9,7 @@ import joelespinal.com.greenprodiver.R
 
 class BookCursorRecyclerViewAdapter : CursorRecyclerViewAdapter {
 
-    constructor(context: Context, cursor: Cursor?) : super(context, cursor!!)
+    constructor(context: Context, cursor: Cursor?) : super(context, cursor)
 
     override fun getItemId(position: Int): Long {
         return super.getItemId(position)

@@ -24,11 +24,11 @@ abstract class CursorRecyclerViewAdapter : Adapter<VH> {
     private var dataSetObserver: DataSetObserver? = null
 
 
-    constructor(context: Context, cursor: Cursor) {
+    constructor(context: Context, cursor: Cursor?) {
         this.context = context
         this.cursor = cursor
         dataValid = cursor != null
-        rowIdColumn = if (dataValid) cursor.getColumnIndex("_id") else -1
+        rowIdColumn = if (dataValid) cursor!!.getColumnIndex("_id") else -1
         if (cursor != null) {
             cursor.registerDataSetObserver(dataSetObserver)
         }

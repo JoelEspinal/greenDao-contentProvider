@@ -23,7 +23,7 @@ android {
 }
 
 greendao {
-    targetGenDir 'src/main/java/src/main/java/joelespinal/com/greenprdiver/models'
+    targetGenDir 'src/main/java/'
     daoPackage 'joelespinal.com.greenprodiver.models'
     schemaVersion 1
 }

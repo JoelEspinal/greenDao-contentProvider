@@ -23,41 +23,48 @@ public class Book {
     private String author;
     @Property(nameInDb = "PUBLICATION_DATE")
     private Date publicationDate = Calendar.getInstance().getTime();
-@Generated(hash = 743716992)
-public Book(Long id, String title, String author, Date publicationDate) {
-    this.id = id;
-    this.title = title;
-    this.author = author;
-    this.publicationDate = publicationDate;
-}
-@Generated(hash = 1839243756)
-public Book() {
-}
-public Long getId() {
-    return this.id;
-}
-public void setId(Long id) {
-    this.id = id;
-}
-public String getTitle() {
-    return this.title;
-}
-public void setTitle(String title) {
-    this.title = title;
-}
-public String getAuthor() {
-    return this.author;
-}
-public void setAuthor(String author) {
-    this.author = author;
-}
-public Date getPublicationDate() {
-    return this.publicationDate;
-}
-public void setPublicationDate(Date publicationDate) {
-    this.publicationDate = publicationDate;
-}
 
+    @Generated(hash = 743716992)
+    public Book(Long id, String title, String author, Date publicationDate) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.publicationDate = publicationDate;
+    }
 
+    @Generated(hash = 1839243756)
+    public Book() {
+    }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public Date getPublicationDate() {
+        return publicationDate;
+    }
+
+    public void setPublicationDate(Date publicationDate) {
+        this.publicationDate = publicationDate;
+    }
 }

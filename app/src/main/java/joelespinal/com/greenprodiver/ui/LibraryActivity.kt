@@ -22,11 +22,10 @@ import java.util.*
 
 class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
-
     val offset = 30
     private var page = 0
 
-    private var bookrecyclerView: RecyclerView? = null
+    private var bookRecyclerView: RecyclerView? = null
     private var loadingMore = false
     private var shortToast: Toast? = null
 
@@ -34,12 +33,12 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_library)
 
-        val layoutManager: LinearLayoutManager = LinearLayoutManager(this)
-        var bookAdapter: BookCursorRecyclerViewAdapter = BookCursorRecyclerViewAdapter(this, null)
+        val layoutManager = LinearLayoutManager(this)
+        var bookAdapter = BookCursorRecyclerViewAdapter(this, null)
 
-        bookrecyclerView = findViewById(R.id.bookRecycleView) as RecyclerView
-        bookrecyclerView!!.setLayoutManager(layoutManager)
-        bookrecyclerView!!.setAdapter(bookAdapter)
+        bookRecyclerView = findViewById(R.id.bookRecycleView) as RecyclerView
+        bookRecyclerView!!.setLayoutManager(layoutManager)
+        bookRecyclerView!!.setAdapter(bookAdapter)
 
         val itemsCountLocal = getItemsCountLocal()
         if (itemsCountLocal == 0) {
@@ -53,8 +52,8 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
                 super.onScrolled(recyclerView, dx, dy)
 
                 val layoutManager: LinearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val lastVisibleItemPosition: Int = layoutManager.findLastVisibleItemPosition()
-                val maxPosition = layoutManager.itemCount
+                var lastVisibleItemPosition: Int = layoutManager.findLastVisibleItemPosition()
+                var maxPosition = layoutManager.itemCount
 
                 if (lastVisibleItemPosition == maxPosition - 1) {
                     if (loadingMore)
@@ -62,18 +61,18 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
 
                     loadingMore = true
                     page++
-                    supportLoaderManager.restartLoader(0, null, LibraryActivity())//-------------
+                    supportLoaderManager.restartLoader(0, null, this@LibraryActivity)//-------------
                 }
             }
         }
 
-        bookrecyclerView!!.addOnScrollListener(scrollListener)
+        bookRecyclerView!!.addOnScrollListener(scrollListener)
     }
 
     fun fillTestElements() {
         val size: Int = 1000
         var contentValuesArray: Array<ContentValues?> = arrayOfNulls(size)
-        for (i in 0..size) {
+        for (i in 0..(size -1)) {
             var contentValues: ContentValues = ContentValues()
             contentValues.put(BookColumn.TITLE, "Book $i")
             contentValues.put(BookColumn.AUTHOR, "UNKNOWN")
@@ -87,7 +86,7 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
     private fun getItemsCountLocal(): Int {
         var itemCount: Int = 0
 
-        var query: Cursor = contentResolver.query(BookContentProvider.urlForItems(0), null, null, null, null);
+        var query: Cursor = contentResolver.query(BookContentProvider.urlForItems(0), null, null, null, null)
         if (query != null) {
             itemCount = query.count
             query.close()
@@ -111,12 +110,12 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
                 shortToast!!.setText("loading MORE " + page)
                 shortToast!!.show()
 
-                var cursor: Cursor = (bookrecyclerView!!.adapter as BookCursorRecyclerViewAdapter).getCursor()!!
+                var cursor: Cursor = (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).getCursor()!!
 
                 var matrixCursor: MatrixCursor = MatrixCursor(BookColumn.COLUMNS)
                 fillMx(cursor, matrixCursor)
 
-                (bookrecyclerView!!.adapter as BookCursorRecyclerViewAdapter).swapCursor(matrixCursor)
+                (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).swapCursor(matrixCursor)
 
                 var runnable = Runnable {
                     run { loadingMore = false }
