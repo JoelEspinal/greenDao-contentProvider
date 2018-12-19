@@ -7,21 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import joelespinal.com.greenprodiver.R
 
-class BookCursorRecyclerViewAdapter : CursorRecyclerViewAdapter {
+class BookCursorRecyclerViewAdapter : CursorRecyclerViewAdapter<CursorRecyclerViewAdapter.VH> {
 
-    constructor(context: Context, cursor: Cursor?) : super(context, cursor)
+    constructor(context: Context, cursor: Cursor?) : super(context, cursor) {
+        this.context = context
+    }
 
     override fun getItemId(position: Int): Long {
         return super.getItemId(position)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CursorRecyclerViewAdapter.VH {
         val view: View = LayoutInflater.from(context).inflate(R.layout.item_book_card, parent, false)
-        return VH(view)
+        return CursorRecyclerViewAdapter.VH(view)
     }
 
-    override fun onBindViewHolder(viewHolder: VH, cursor: Cursor) {
-        var holder: VH = viewHolder
+    override fun onBindViewHolder(viewHolder: CursorRecyclerViewAdapter.VH, cursor: Cursor) {
+        var holder: CursorRecyclerViewAdapter.VH = viewHolder
         cursor.moveToPosition(cursor.position)
         holder.setData(cursor)
     }

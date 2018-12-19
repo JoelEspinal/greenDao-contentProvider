@@ -17,7 +17,6 @@ import android.widget.Toast
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
 import joelespinal.com.greenprodiver.data.BookContentProvider
-import joelespinal.com.greenprodiver.data.LibraryContract
 import joelespinal.com.greenprodiver.ui.adapters.BookCursorRecyclerViewAdapter
 import java.util.*
 
@@ -35,12 +34,20 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_library)
 
-        val layoutManager = LinearLayoutManager(this)
-        var bookAdapter = BookCursorRecyclerViewAdapter(this, null)
 
-        bookRecyclerView = findViewById(R.id.bookRecycleView) as RecyclerView
+        var uri2: Uri = BookContentProvider.urlForItems(0)
+
+        var query2: Cursor? = contentResolver.query(uri2, null, null, null, null)
+
+
+        val layoutManager = LinearLayoutManager(this)
+        var bookAdapter = BookCursorRecyclerViewAdapter(this, query2)
+
+        bookRecyclerView =  findViewById(R.id.bookRecycleView)
         bookRecyclerView!!.setLayoutManager(layoutManager)
         bookRecyclerView!!.setAdapter(bookAdapter)
+
+        Log.d("library", "oncreate")
 
         val itemsCountLocal = getItemsCountLocal()
         if (itemsCountLocal == 0) {
@@ -75,7 +82,7 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
     fun fillTestElements() {
         val size: Int = 1000
         var contentValuesArray: Array<ContentValues?> = arrayOfNulls(size)
-        for (i in 0..(size -1)) {
+        for (i in 0..(size - 1)) {
             var contentValues: ContentValues = ContentValues()
             contentValues.put(BookColumn.TITLE, "Book $i")
             contentValues.put(BookColumn.AUTHOR, "UNKNOWN")

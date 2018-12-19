@@ -4,7 +4,6 @@ import android.content.Context
 import android.database.Cursor
 import android.database.DataSetObserver
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.RecyclerView.Adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,7 @@ import joelespinal.com.greenprodiver.ui.adapters.CursorRecyclerViewAdapter.VH
 import org.jetbrains.annotations.Nullable
 
 
-abstract class CursorRecyclerViewAdapter : Adapter<VH> {
+abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH> {
 
     protected var context: Context? = null
     private var cursor: Cursor? = null
@@ -29,9 +28,8 @@ abstract class CursorRecyclerViewAdapter : Adapter<VH> {
         this.cursor = cursor
         dataValid = cursor != null
         rowIdColumn = if (dataValid) cursor!!.getColumnIndex("_id") else -1
-        if (cursor != null) {
-            cursor.registerDataSetObserver(dataSetObserver)
-        }
+        dataSetObserver = NotifyingDataSetObserver(this)
+        cursor?.registerDataSetObserver(dataSetObserver)
     }
 
 
@@ -70,12 +68,14 @@ abstract class CursorRecyclerViewAdapter : Adapter<VH> {
 
         onBindViewHolder(viewHolder, cursor!!)
     }
+//
+//    @Nullable
+//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+//        val view: View = LayoutInflater.from(context).inflate(R.layout.item_book_card, parent, false)
+//        return VH(view)
+//    }
 
-    @Nullable
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val view: View = LayoutInflater.from(context).inflate(R.layout.item_book_card, parent, false)
-        return VH(view)
-    }
+
 
 
     fun changeCursor(cursor: Cursor) {
@@ -129,7 +129,7 @@ abstract class CursorRecyclerViewAdapter : Adapter<VH> {
 
         override fun onInvalidated() {
             super.onInvalidated()
-            (this as CursorRecyclerViewAdapter).setDataValid(false)
+            (this.adapter as CursorRecyclerViewAdapter).setDataValid(false)
         }
     }
 
