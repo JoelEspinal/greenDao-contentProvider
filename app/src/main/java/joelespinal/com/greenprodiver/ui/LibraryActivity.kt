@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
@@ -43,7 +45,7 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         val layoutManager = LinearLayoutManager(this)
         var bookAdapter = BookCursorRecyclerViewAdapter(this, query2)
 
-        bookRecyclerView =  findViewById(R.id.bookRecycleView)
+        bookRecyclerView = findViewById(R.id.bookRecycleView)
         bookRecyclerView!!.setLayoutManager(layoutManager)
         bookRecyclerView!!.setAdapter(bookAdapter)
 
@@ -78,6 +80,12 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         bookRecyclerView!!.addOnScrollListener(scrollListener)
         Log.d("CREATE", "CREATE")
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_crud, menu)
+        return true
+    }
+
 
     fun fillTestElements() {
         val size: Int = 1000
