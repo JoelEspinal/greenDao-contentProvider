@@ -32,6 +32,12 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
     private var loadingMore = false
     private var shortToast: Toast? = null
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return super.onOptionsItemSelected(item)
+
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_library)
@@ -46,8 +52,8 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         var bookAdapter = BookCursorRecyclerViewAdapter(this, query2)
 
         bookRecyclerView = findViewById(R.id.bookRecycleView)
-        bookRecyclerView!!.setLayoutManager(layoutManager)
-        bookRecyclerView!!.setAdapter(bookAdapter)
+        bookRecyclerView!!.layoutManager = layoutManager
+        bookRecyclerView!!.adapter = bookAdapter
 
         Log.d("library", "oncreate")
 
@@ -88,28 +94,26 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
 
 
     fun fillTestElements() {
-        val size: Int = 1000
-        var contentValuesArray: Array<ContentValues?> = arrayOfNulls(size)
-        for (i in 0..(size - 1)) {
-            var contentValues: ContentValues = ContentValues()
+        val size = 10
+        val contentValuesArray: Array<ContentValues?> = arrayOfNulls(size)
+        for (i in 1..size) {
+            val contentValues = ContentValues()
             contentValues.put(BookColumn.TITLE, "Book $i")
             contentValues.put(BookColumn.AUTHOR, "UNKNOWN")
             contentValues.put(BookColumn.PUBLICATION_DATE, Calendar.getInstance().timeInMillis)
             contentValuesArray[i] = contentValues
 
-            var uri: Uri = BookContentProvider.urlForItems(0)
+            val uri: Uri = BookContentProvider.urlForItems(0)
             contentResolver.insert(uri, contentValues)
         }
-
-        // contentResolver.insert(LibraryContract.CONTENT_URI, contentValuesArray)
     }
 
     private fun getItemsCountLocal(): Int {
         var itemCount: Int = 0
 
-        var uri: Uri = BookContentProvider.urlForItems(0)
+        val uri: Uri = BookContentProvider.urlForItems(0)
 
-        var query: Cursor? = contentResolver.query(uri, null, null, null, null)
+        val query: Cursor? = contentResolver.query(uri, null, null, null, null)
         if (query != null) {
             itemCount = query.count
             query.close()
@@ -126,6 +130,7 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
     }
 
 
+    var handlerToWait = Handler()
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         when (loader.id) {
             0 -> {
@@ -133,14 +138,14 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
                 shortToast!!.setText("loading MORE " + page)
                 shortToast!!.show()
 
-                var cursor: Cursor = (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).getCursor()!!
+                val cursor: Cursor = (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).getCursor()!!
 
-                var matrixCursor: MatrixCursor = MatrixCursor(BookColumn.COLUMNS)
+                val matrixCursor: MatrixCursor = MatrixCursor(BookColumn.COLUMNS)
                 fillMx(cursor, matrixCursor)
 
                 (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).swapCursor(matrixCursor)
 
-                var runnable = Runnable {
+                val runnable = Runnable {
                     run { loadingMore = false }
                 }
 
@@ -150,7 +155,6 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         }
     }
 
-    var handlerToWait: Handler = Handler()
 
     override fun onLoaderReset(p0: Loader<Cursor>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
