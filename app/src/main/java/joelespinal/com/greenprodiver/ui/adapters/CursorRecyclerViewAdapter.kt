@@ -3,16 +3,11 @@ package joelespinal.com.greenprodiver.ui.adapters
 import android.content.Context
 import android.database.Cursor
 import android.database.DataSetObserver
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
-import joelespinal.com.greenprodiver.ui.adapters.CursorRecyclerViewAdapter.VH
-import org.jetbrains.annotations.Nullable
-
 
 abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH> {
 
@@ -68,24 +63,12 @@ abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : Recycle
 
         onBindViewHolder(viewHolder, cursor!!)
     }
-//
-//    @Nullable
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-//        val view: View = LayoutInflater.from(context).inflate(R.layout.item_book_card, parent, false)
-//        return VH(view)
-//    }
-
-
-
 
     fun changeCursor(cursor: Cursor) {
-        val old: Cursor? = swapCursor(cursor)
-        if (old != null) {
-            old.close()
-        }
+        swapCursor(cursor)?.close()
     }
 
-    fun swapCursor(newCursor: Cursor): Cursor? {
+    fun swapCursor(newCursor: Cursor?): Cursor? {
         if (newCursor == this.cursor) {
             return null
         }
@@ -99,7 +82,7 @@ abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : Recycle
         if (cursor != null) {
             cursor!!.registerDataSetObserver(dataSetObserver)
 
-            rowIdColumn = newCursor.getColumnIndexOrThrow("_id")
+            rowIdColumn = newCursor!!.getColumnIndexOrThrow("_id")
             dataValid = true
             notifyDataSetChanged()
         } else {
@@ -133,16 +116,16 @@ abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : Recycle
         }
     }
 
-
     class VH : RecyclerView.ViewHolder {
 
         var titleTextView: TextView? = null
         var authorTextView: TextView? = null
-        var pblicationDateTextView: TextView? = null
+        var publicationDateTextView: TextView? = null
 
         constructor(itemView: View) : super(itemView) {
             this.titleTextView = itemView.findViewById(R.id.titleText)
             this.authorTextView = itemView.findViewById(R.id.authorTextView)
+            this.publicationDateTextView = itemView.findViewById(R.id.publicationDateTextView)
         }
 
         fun setData(cursor: Cursor) {
@@ -150,11 +133,13 @@ abstract class CursorRecyclerViewAdapter<VH : RecyclerView.ViewHolder> : Recycle
             val authorColumnIndex: Int = cursor.getColumnIndex(BookColumn.AUTHOR)
             val publicationDateColumnIndex: Int = cursor.getColumnIndex(BookColumn.PUBLICATION_DATE)
 
-            titleTextView!!.setText(cursor.getString(titleColumnIndex))
-            titleTextView!!.setText(cursor.getString(authorColumnIndex))
-            titleTextView!!.setText(cursor.getString(publicationDateColumnIndex))
+            val title = cursor.getString(titleColumnIndex)
+            val author = cursor.getString(authorColumnIndex)
+            val publicationDate = cursor.getString(publicationDateColumnIndex)
+
+            titleTextView!!.text = title
+            authorTextView!!.text = author
+            publicationDateTextView!!.text = publicationDate
         }
     }
-
-
 }

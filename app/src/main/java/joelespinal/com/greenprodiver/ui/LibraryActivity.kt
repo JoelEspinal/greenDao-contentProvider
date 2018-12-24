@@ -2,65 +2,45 @@ package joelespinal.com.greenprodiver.ui
 
 import android.content.ContentValues
 import android.database.Cursor
-import android.database.MatrixCursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.CursorLoader
-import android.support.v4.content.Loader
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.CursorLoader
+import androidx.loader.content.Loader
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
 import joelespinal.com.greenprodiver.data.BookContentProvider
 import joelespinal.com.greenprodiver.ui.adapters.BookCursorRecyclerViewAdapter
 import java.util.*
 
-
 class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
-    private val offset = 30
+    private val LIBRARY_LOADER = 0
+    private val offset = 10
     private var page = 0
 
-    private var bookRecyclerView: RecyclerView? = null
+    private lateinit var bookRecyclerView: RecyclerView
     private var loadingMore = false
-    private var shortToast: Toast? = null
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return super.onOptionsItemSelected(item)
-
-
-    }
+    private lateinit var bookAdapter: BookCursorRecyclerViewAdapter
+    private lateinit var shortToast: Toast
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_library)
 
-
-        var uri2: Uri = BookContentProvider.urlForItems(0)
-
-        var query2: Cursor? = contentResolver.query(uri2, null, null, null, null)
-
-
         val layoutManager = LinearLayoutManager(this)
-        var bookAdapter = BookCursorRecyclerViewAdapter(this, query2)
+        bookAdapter = BookCursorRecyclerViewAdapter(this, null)
 
         bookRecyclerView = findViewById(R.id.bookRecycleView)
         bookRecyclerView!!.layoutManager = layoutManager
         bookRecyclerView!!.adapter = bookAdapter
-
-        Log.d("library", "oncreate")
-
-        val itemsCountLocal = getItemsCountLocal()
-        if (itemsCountLocal == 0) {
-            fillTestElements()
-        }
 
         shortToast = Toast.makeText(this, "", Toast.LENGTH_SHORT)
 
@@ -78,12 +58,15 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
 
                     loadingMore = true
                     page++
-                    supportLoaderManager.restartLoader(0, null, this@LibraryActivity)//-------------
+                    LoaderManager.getInstance(this@LibraryActivity).restartLoader(0, null, this@LibraryActivity)//-------------
                 }
             }
         }
 
         bookRecyclerView!!.addOnScrollListener(scrollListener)
+
+        LoaderManager.getInstance(this).initLoader(LIBRARY_LOADER, null, this)
+
         Log.d("CREATE", "CREATE")
     }
 
@@ -92,88 +75,63 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item!!.itemId) {
+            R.id.action_add -> {
+                fillTestElements()
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
 
     fun fillTestElements() {
         val size = 10
-        val contentValuesArray: Array<ContentValues?> = arrayOfNulls(size)
         for (i in 1..size) {
             val contentValues = ContentValues()
             contentValues.put(BookColumn.TITLE, "Book $i")
             contentValues.put(BookColumn.AUTHOR, "UNKNOWN")
             contentValues.put(BookColumn.PUBLICATION_DATE, Calendar.getInstance().timeInMillis)
-            contentValuesArray[i] = contentValues
 
             val uri: Uri = BookContentProvider.urlForItems(0)
             contentResolver.insert(uri, contentValues)
+
+            LoaderManager.getInstance(this).restartLoader(LIBRARY_LOADER, null, this)
         }
-    }
-
-    private fun getItemsCountLocal(): Int {
-        var itemCount: Int = 0
-
-        val uri: Uri = BookContentProvider.urlForItems(0)
-
-        val query: Cursor? = contentResolver.query(uri, null, null, null, null)
-        if (query != null) {
-            itemCount = query.count
-            query.close()
-        }
-
-        return itemCount
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
         when (id) {
-            0 -> return CursorLoader(this, BookContentProvider.urlForItems(offset * page), null, null, null, null)
+            LIBRARY_LOADER -> {
+                return CursorLoader(
+                    this,
+                    BookContentProvider.urlForItems(offset * page),
+                    BookColumn.COLUMNS,
+                    null,
+                    null,
+                    null
+                )
+
+            }
             else -> throw  IllegalArgumentException("no id handled!")
         }
     }
 
-
-    var handlerToWait = Handler()
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         when (loader.id) {
-            0 -> {
-                Log.d("LIBRARY", "onLoadFinished: loading MORE")
+            LIBRARY_LOADER -> {
                 shortToast!!.setText("loading MORE " + page)
                 shortToast!!.show()
 
-                val cursor: Cursor = (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).getCursor()!!
-
-                val matrixCursor: MatrixCursor = MatrixCursor(BookColumn.COLUMNS)
-                fillMx(cursor, matrixCursor)
-
-                (bookRecyclerView!!.adapter as BookCursorRecyclerViewAdapter).swapCursor(matrixCursor)
-
-                val runnable = Runnable {
-                    run { loadingMore = false }
-                }
-
-                handlerToWait.postDelayed(runnable, 2000)
+                bookAdapter.changeCursor(data!!)
             }
             else -> throw IllegalArgumentException("no loader id handled!")
         }
     }
 
 
-    override fun onLoaderReset(p0: Loader<Cursor>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    private fun fillMx(data: Cursor, mx: MatrixCursor) {
-        if (data == null)
-            return
-
-        data.moveToPosition(-1)
-        while (data.moveToNext()) {
-            mx.addRow(
-                arrayOf(
-                    data.getColumnIndex(BookColumn._ID),
-                    data.getColumnIndex(BookColumn.TITLE),
-                    data.getColumnIndex(BookColumn.AUTHOR),
-                    data.getColumnIndex(BookColumn.PUBLICATION_DATE)
-                )
-            )
-        }
+    override fun onLoaderReset(loader: Loader<Cursor>) {
+        bookAdapter!!.swapCursor(null)
     }
 }

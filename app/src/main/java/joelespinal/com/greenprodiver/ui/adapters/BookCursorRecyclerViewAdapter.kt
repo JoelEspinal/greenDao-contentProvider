@@ -9,13 +9,8 @@ import joelespinal.com.greenprodiver.R
 
 class BookCursorRecyclerViewAdapter : CursorRecyclerViewAdapter<CursorRecyclerViewAdapter.VH> {
 
-    constructor(context: Context, cursor: Cursor?) : super(context, cursor) {
-        this.context = context
-    }
 
-    override fun getItemId(position: Int): Long {
-        return super.getItemId(position)
-    }
+    constructor(context: Context, cursor: Cursor?) : super(context, cursor)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CursorRecyclerViewAdapter.VH {
         val view: View = LayoutInflater.from(context).inflate(R.layout.item_book_card, parent, false)
@@ -27,5 +22,4 @@ class BookCursorRecyclerViewAdapter : CursorRecyclerViewAdapter<CursorRecyclerVi
         cursor.moveToPosition(cursor.position)
         holder.setData(cursor)
     }
-
 }
