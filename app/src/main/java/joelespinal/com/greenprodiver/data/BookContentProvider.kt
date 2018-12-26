@@ -201,7 +201,7 @@ class BookContentProvider : ContentProvider() {
             publicationDate = Date(dateLong)
         }
 
-        val database: SQLiteDatabase = dbHelper!!.writableDatabase
+        val database: SQLiteDatabase? = dbHelper?.run{this.writableDatabase}
         val daoSession: DaoSession = DaoMaster(database).newSession()
         var bookDao = daoSession.bookDao
         val match: Int = uriMaster.match(uri)

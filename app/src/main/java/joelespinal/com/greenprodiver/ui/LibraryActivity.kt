@@ -1,7 +1,9 @@
 package joelespinal.com.greenprodiver.ui
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +19,10 @@ import androidx.recyclerview.widget.RecyclerView
 import joelespinal.com.greenprodiver.R
 import joelespinal.com.greenprodiver.constants.BookColumn
 import joelespinal.com.greenprodiver.data.BookContentProvider
+import joelespinal.com.greenprodiver.models.Book
+import joelespinal.com.greenprodiver.models.BookDao
+import joelespinal.com.greenprodiver.models.DaoMaster
+import joelespinal.com.greenprodiver.models.DaoSession
 import joelespinal.com.greenprodiver.ui.adapters.BookCursorRecyclerViewAdapter
 import java.util.*
 
@@ -58,7 +64,8 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
 
                     loadingMore = true
                     page++
-                    LoaderManager.getInstance(this@LibraryActivity).restartLoader(0, null, this@LibraryActivity)//-------------
+                    LoaderManager.getInstance(this@LibraryActivity)
+                        .restartLoader(0, null, this@LibraryActivity)//-------------
                 }
             }
         }
@@ -81,9 +88,33 @@ class LibraryActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Curso
                 fillTestElements()
                 return true
             }
+            R.id.action_insert -> {
+                insertBookTest()
+            }
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun insertBookTest()/*: Uri */ {
+
+        var book: Book = Book()
+        book.title = "El principito"
+        book.author = "El aviador"
+
+
+        var dbHelper = DaoMaster.DevOpenHelper(this, "library.db")
+        var db = dbHelper!!.getWritableDb()
+        val database: SQLiteDatabase = dbHelper!!.readableDatabase
+        val daoSession: DaoSession = DaoMaster(database).newSession()
+        var bookDao = daoSession.bookDao
+        val id: Long = bookDao.insert(book)
+
+        Toast.makeText(this, "id: $id", Toast.LENGTH_LONG).show()
+
+        // val retUri = ContentUris.withAppendedId(uri, id)
+
+        // return ContentUris.withAppendedId(retUri, id)
     }
 
     fun fillTestElements() {
